@@ -1,0 +1,416 @@
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <map>
+
+using namespace std;
+
+// Function prototype for readUsers()
+map<string, pair<string, double>> readUsers();
+void writeUsers(map<string, pair<string, double>> users);
+
+// Class for the bank
+class Bank
+{
+public:
+    string username;
+    string password;
+    double balance;
+
+    void userLogin();
+    void withdrawMoney();
+    void checkBalance();
+    void changePassword();
+    void adminLogin();
+    void addUser();
+    void depositMoney();
+    void admin_changePassword();
+    void chooseAdmin();
+    void chooseUser();
+    void chooseNormalUser(string username);
+
+};
+
+
+// Function to allow a normal user to login
+void Bank::userLogin()
+{
+    string line;
+    string user;
+    string pass;
+    bool found = false;
+    ifstream read("users.txt");
+    while (getline(read, line))
+    {
+        stringstream iss(line);
+        getline(iss, user, ' ');
+        getline(iss, pass, ' ');
+        if (user == username && pass == password)
+        {
+            found = true;
+            break;
+        }
+    }
+    if (found)
+    {
+        cout << "Login Successful!" << endl;
+    }
+    else
+    {
+        cout << "Login Failed!" << endl;
+    }
+}
+
+// Function to allow a normal user to withdraw money from their account
+void Bank::withdrawMoney()
+{
+    map<string, pair<string, double>> users = readUsers();
+    if (users.find(username) != users.end())
+    {
+        if (users[username].second >= balance)
+        {
+            users[username].second -= balance;
+            writeUsers(users);
+            cout << "Withdraw Successful!" << endl;
+        }
+        else
+        {
+            cout << "Withdraw Failed! Insufficient balance." << endl;
+        }
+    }
+    else
+    {
+        cout << "Withdraw Failed! User not found." << endl;
+    }
+}
+
+// Function to allow a normal user to check their balance
+void Bank::checkBalance()
+{
+    map<string, pair<string, double>> users = readUsers();
+    if (users.find(username) != users.end())
+    {
+        cout << "Your balance is: " << users[username].second << endl;
+    }
+    else
+    {
+        cout << "Balance check failed! User not found." << endl;
+    }
+}
+
+
+// Function to allow a normal user to change their password
+void Bank::changePassword()
+{
+    string line;
+    string user;
+    string pass;
+    double balance;
+    bool found = false;
+    ifstream read("users.txt");
+    map<string, pair<string, double>> users;
+    while (getline(read, line))
+    {
+        stringstream iss(line);
+        getline(iss, user, ' ');
+        getline(iss, pass, ' ');
+        iss >> balance;
+        if (user == username && pass == password)
+        {
+            found = true;
+            break;
+        }
+    }
+    if (found)
+    {
+        users[user] = make_pair(this->password, balance);
+        ofstream write("users.txt");
+        for (const auto& entry : users)
+        {
+            write << entry.first << " " << entry.second.first << " " << entry.second.second << endl;
+        }
+        cout << "Password changed successfully!" << endl;
+    }
+    else
+    {
+        cout << "Password change failed!" << endl;
+    }
+}
+
+// Function to read the users.txt file and store the data in a map
+map<string, pair<string, double>> readUsers()
+{
+    map<string, pair<string, double>> users;
+    string line;
+    string user;
+    string pass;
+    double balance;
+    ifstream read("users.txt");
+    while (getline(read, line))
+    {
+        stringstream iss(line);
+        getline(iss, user, ' ');
+        getline(iss, pass, ' ');
+        iss >> balance;
+        users[user] = make_pair(pass, balance);
+    }
+    return users;
+}
+
+// Function to write the data from the map to the users.txt file
+void writeUsers(map<string, pair<string, double>> users)
+{
+    ofstream write("users.txt");
+    for (const auto& entry : users)
+    {
+        write << entry.first << " " << entry.second.first << " " << entry.second.second << endl;
+    }
+}
+
+// Function to allow an admin to login
+void Bank::adminLogin()
+{
+    string line;
+    string user;
+    string pass;
+    bool found = false;
+    ifstream read("admin.txt");
+    while (getline(read, line))
+    {
+        stringstream iss(line);
+        getline(iss, user, ' ');
+        getline(iss, pass, ' ');
+        if (user == username && pass == password)
+        {
+            found = true;
+            break;
+        }
+    }
+    if (found)
+    {
+        cout << "Login Successful!" << endl;
+    }
+    else
+    {
+        cout << "Login Successful!" << endl;
+    }
+}
+
+// Function to allow an admin to add a new user
+void Bank::addUser()
+{
+    map<string, pair<string, double>> users = readUsers();
+    users[username] = make_pair(password, balance);
+    writeUsers(users);
+    cout << "User added successfully!" << endl;
+}
+
+// Function to allow an admin to deposit money into a user's account
+void Bank::depositMoney()
+{
+    map<string, pair<string, double>> users = readUsers();
+    if (users.find(username) != users.end())
+    {
+        users[username].second += balance;
+        writeUsers(users);
+        cout << "Deposit successful!" << endl;
+    }
+    else
+    {
+        cout << "Deposit failed!" << endl;
+    }
+}
+
+
+// Function to allow an admin to change their password
+void Bank::admin_changePassword()
+{
+    string line;
+    string user;
+    string pass;
+    double balance;
+    bool found = false;
+    ifstream read("admin.txt");
+    map<string, pair<string, double>> admin;
+    while (getline(read, line))
+    {
+        stringstream iss(line);
+        getline(iss, user, ' ');
+        getline(iss, pass, ' ');
+        iss >> balance;
+        if (user == username && pass == password)
+        {
+            found = true;
+            break;
+        }
+    }
+    if (found){
+
+        admin[user] = make_pair(this->password, balance);
+        ofstream write("admin.txt");
+        for (const auto& entry : admin)
+        {
+            write << entry.first << " " << entry.second.first << " " << entry.second.second << endl;
+
+        cout << "Password changed successfully!" << endl;
+    }
+    }else {
+        cout << "Password change failed!" << endl;
+    }
+}
+
+// Function to read the admin.txt file and store the data in a map
+map<string, pair<string,double>> readAdmin()
+{
+    map<string, pair<string, double>> admin;
+    string line;
+    string user;
+    string pass;
+    double balance;
+    ifstream read("admin.txt");
+    while (getline(read, line))
+    {
+        stringstream iss(line);
+        getline(iss, user, ' ');
+        getline(iss, pass, ' ');
+        iss >> balance;
+        admin[user] = make_pair(pass, balance);
+    }
+    return admin;
+}
+
+// Function to write the data from the map to the admin.txt file
+void writeAdmin(map<string, pair<string, double>> admin)
+{
+    ofstream write("admin.txt");
+    for (const auto& entry : admin)
+    {
+        write << entry.first << " " << entry.second.first << " " << entry.second.second << endl;
+    }
+}
+
+// Function to allow user to choose whether they are an admin or a normal user
+void Bank::chooseUser()
+{
+    int choice;
+    cout << "Are you an admin or a normal user?" << endl;
+    cout << "1. Admin" << endl;
+    cout << "2. Normal User" << endl;
+    cout << "Enter your choice: ";
+    cin >> choice;
+    if (choice == 1)
+    {
+        Bank admin;
+        cout << "Enter your username: ";
+        cin >> admin.username;
+        cout << "Enter your password: ";
+        cin >> admin.password;
+        admin.adminLogin();
+        if (admin.username == "admin" && admin.password == "admin123") {
+            admin.chooseAdmin(); // Access admin menu
+        }
+    }
+    else if (choice == 2)
+    {
+        Bank user;
+        cout << "Enter your username: ";
+        cin >> user.username;
+        cout << "Enter your password: ";
+        cin >> user.password;
+        user.userLogin();
+        chooseNormalUser(user.username); // Access normal user menu
+    }
+    else
+    {
+        cout << "Invalid choice!" << endl;
+    }
+}
+
+// Function to allow admin to choose what they want to do
+void Bank::chooseAdmin()
+{
+    int choice;
+    cout << "What do you want to do?" << endl;
+    cout << "1. Add a new user" << endl;
+    cout << "2. Deposit money into a user's account" << endl;
+    cout << "3. Change your password" << endl;
+    cout << "Enter your choice: ";
+    cin >> choice;
+    if (choice == 1)
+    {
+        Bank admin;
+        cout << "Enter the username of the new user: ";
+        cin >> admin.username;
+        cout << "Enter the password of the new user: ";
+        cin >> admin.password;
+        cout << "Enter the balance of the new user: ";
+        cin >> admin.balance;
+        admin.addUser();
+    }
+    else if (choice == 2)
+    {
+        Bank admin;
+        cout << "Enter the username of the user: ";
+        cin >> admin.username;
+        cout << "Enter the amount to be deposited: ";
+        cin >> admin.balance;
+        admin.depositMoney();
+    }
+    else if (choice == 3)
+    {
+        Bank admin;
+        cout << "Enter your username: ";
+        cin >> admin.username;
+        cout << "Enter your password: ";
+        cin >> admin.password;
+        cout << "Enter your new password: ";
+        cin >> admin.password;
+        admin.admin_changePassword();
+    }
+    else
+    {
+        cout << "Invalid choice!" << endl;
+    }
+}
+
+// Function to allow normal user to choose what they want to do
+void Bank::chooseNormalUser(string username)
+{
+    int choice;
+    cout << "What do you want to do?" << endl;
+    cout << "1. Withdraw money" << endl;
+    cout << "2. Change your password" << endl;
+    cout << "3. Check your balance" << endl;
+    cout << "Enter your choice: ";
+    cin >> choice;
+    if (choice == 1)
+    {
+        cout << "Enter the amount to be withdrawn: ";
+        cin >> balance;
+        withdrawMoney();
+    }
+    else if (choice == 2)
+    {
+        cout << "Enter your new password: ";
+        cin >> password;
+        changePassword();
+    }
+    else if (choice == 3)
+    {
+        checkBalance();
+    }
+    else
+    {
+        cout << "Invalid choice!" << endl;
+    }
+}
+
+
+// Main function
+int main()
+{
+    Bank bank;
+    bank.chooseUser();
+    return 0;
+}
